@@ -1,0 +1,49 @@
+---
+- hosts: all
+  become: true
+  gather_facts: true
+  tasks:
+      #Ensure the EPEL repo is enabled on the VM
+    - name: Ensure EPEL is enabled
+      yum:
+        name: epel-release
+        state: present
+    #Stop the currently running tools vmware-tools-service
+    - name: stop vmware-tools-services
+      service:
+        name: vmware-tools-services
+        state: stopped
+      ignore_errors: true
+    #Listing the installed packages
+    - name: List installed packages
+      yum:
+        list: installed
+      register: rpm_installed
+
+#    - name: debug the installed list
+#      debug:
+#        var: rpm_installed
+
+    - name: setfact to get the right list of package
+      set_fact:
+        package_list: "{{ rpm_installed.results | map(attribute='name') | select('search', 'vmware-tools') | list }}"
+
+    - name: debug the package_list which will be removed
+      debug:
+        var: package_list
+    #Remove vmware tools
+    - name: Remove all packages starting with vmware-tools
+      yum:
+        name: "{{ rpm_installed.results | map(attribute='name') | select('search', 'vmware-tools') | list }}"
+        state: absent
+    #installing open-vm-tools
+    - name: Install current open-vm-tools
+      yum:
+        name: open-vm-tools
+        state: present
+    #Starting vmware-tool-services
+    - name: start vmware-tools-services
+      service:
+        name: vmtoolsd
+        state: started
+...
