@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
 
-    var url ='./';
+    var url ='C:/xampp/htdocs/gpc/modules/fullcalendar/';
 
     $('body').on('click', '.datetimepicker', function() {
         $(this).not('.hasDateTimePicker').datetimepicker({
